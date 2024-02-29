@@ -1,6 +1,6 @@
 use std::fs;
 use std::io::ErrorKind;
-use std::stdin;
+use std::io::stdin;
 
 use crate::Command;
 
@@ -29,37 +29,39 @@ pub fn insert_text(){
         .expect("error at entering");
 }
 
-pub fn create_file(filename:String, flags:String) -> bool {
-    let default_cnt:&str = "";
-    let actions:Vec<&str> = vec!["-in"];
-    let counter:usize = 0;
-    
-    let len_actions:usize = 1;
+pub fn create_file(filename:String, flags:Vec<String>) -> bool {
+    let mut content:String = String::new();
+    let actions:Vec<&str> = vec!["-in", "-m"];
 
-    let sub_orders:Vec<&str> = flags.to_string()
-        .split_whitespace()
-        .collect();
-    
+    let mut counter:usize = 0;
+    let flags_len = flags.len();
+
     let write_in:bool = loop {
 
-        if actions[counter] == sub_orders[0] {
-            println!("it has available orders");
+        if flags[counter] == "-in" {
             break true;
         }
 
-        if counter == len_actions {
+        if counter == flags_len {
             break false;
         }
 
         counter += 1;
+    };
+    
+    if write_in {
+        stdin()
+            .read_line(&mut content)
+            .expect();
     }
 
-    match fs::write(filename.clone(), default_cnt) {
-        Ok(out) => println!("greate"),
+    match fs::write(filename.clone(), content) {
+        Ok(out) => {
+            println!("greate")
+        },
         Err(e) => {
-            e.kind() {
-                _ => println!("some error occurred {}", e.display),
-                false
+            match e.kind() {
+                _ => println!("some error occurred {}", e),
             }
         }
     };
@@ -67,9 +69,87 @@ pub fn create_file(filename:String, flags:String) -> bool {
     true
 }
 
+
+fn project_carpets(){
+    fs::create_dir("tests");
+    fs::create_dir("lib");
+    fs::create_dir("src");
+}
+
+fn project_files() {
+    match fs::read_dir("tests") {
+        Ok(output) => println!("filling tests dir"),
+        Err(err) => {
+            match err.kind() {
+                ErrorKind::NotFound => println!("not found tests dir"),
+                _ => println!("not knowing err"),
+            }
+        }
+    };
+    
+    match fs::read_dir("lib") {
+        Ok(output) => println!("filling lib dir"),
+        Err(err) => {
+            match err.kind() {
+                ErrorKind::NotFound => println!("not found lib dir"),
+                _ => println!("not known err"),
+            }
+        }
+    };
+    
+    match fs::read_dir("src") {
+        Ok(output) => println!("filling src dir"),
+        Err(err) => {
+            match err.kind() {
+                ErrorKind::NotFound => println!("not found src dir"),
+                _ => println!("not known err"),
+            }
+        }
+    };
+}
+
+fn single_carpet(){
+    match fs::create_dir("") {
+        Ok(out) => println!("carpet ready"),
+        Err(err) => {
+            match err.kind(){
+                ErrorKind::NotFound => println!("not found carpet"),
+                ErrorKind::PermissionDenied => println!("not authorized"),
+                _ => println!("not known err creating carpet")
+            }
+        }
+    };
+}
+
+fn project_init(){
+    project_carpets();
+    project_files();
+}
+
 pub fn switch_action(command:&Command){
     if command.action == "new" {
-        println!("newing");
+        
+        let mut counter = 0;
+ 
+        loop {
+            if command.flags[counter] == "-f" {
+                create_file(command.target, command.flags);
+                println!("creating file");
+            }
+
+            if command.flags[counter] == "-c" {
+                create_carpet();
+            }
+
+            if command.flags[counter] == "-p" {
+                project_init(command.target);
+            }
+
+            counter += 1;
+        }
+    }
+    else if command.action == "free" {
+        println!("freeing");
     }
     else if command.action == "delete" {
         println!("deleting");
@@ -79,5 +159,13 @@ pub fn switch_action(command:&Command){
     }
     else if command.action == "edit" {
         println!("edit");
+    }
+    else if command.action == "ask" {
+        println!("ask");
+    }
+    else if command.action == "build" {
+        println!("build");
+    } else {
+        println!("not available command");
     }
 }
