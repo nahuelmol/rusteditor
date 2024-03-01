@@ -2,6 +2,8 @@ use std::fs;
 use std::io::ErrorKind;
 use std::io::stdin;
 
+use crate::file_meths::deletea;
+
 use crate::Command;
 
 pub fn save_file_cnt(file:String) {
@@ -13,7 +15,7 @@ pub fn save_file_cnt(file:String) {
             match err.kind() {
                 ErrorKind::NotFound => { 
                     println!("file not found");
-                    create_file(file.clone(), "".to_string());
+                    //create_file(file.clone(), "".to_string());
                 },
                 ErrorKind::PermissionDenied => println!("permission"),
                 _ => println!("unknown error"),
@@ -22,14 +24,7 @@ pub fn save_file_cnt(file:String) {
     };
 }
 
-pub fn insert_text(){ 
-    let mut content = String::new(); 
-    stdin()
-        .read_line(&mut content)
-        .expect("error at entering");
-}
-
-pub fn create_file(filename:String, flags:Vec<String>) -> bool {
+pub fn create_file(filename:String, flags:Vec<String>) {
     let mut content:String = String::new();
     let actions:Vec<&str> = vec!["-in", "-m"];
 
@@ -52,7 +47,7 @@ pub fn create_file(filename:String, flags:Vec<String>) -> bool {
     if write_in {
         stdin()
             .read_line(&mut content)
-            .expect();
+            .expect("err filling the file");
     }
 
     match fs::write(filename.clone(), content) {
@@ -65,52 +60,72 @@ pub fn create_file(filename:String, flags:Vec<String>) -> bool {
             }
         }
     };
-
-    true
 }
 
 
 fn project_carpets(){
-    fs::create_dir("tests");
-    fs::create_dir("lib");
-    fs::create_dir("src");
-}
-
-fn project_files() {
-    match fs::read_dir("tests") {
-        Ok(output) => println!("filling tests dir"),
-        Err(err) => {
-            match err.kind() {
-                ErrorKind::NotFound => println!("not found tests dir"),
-                _ => println!("not knowing err"),
-            }
-        }
+    match fs::create_dir("tests") {
+        Ok(res) => println!("handled"),
+        Err(err) => println!("err ocurred"),
     };
-    
-    match fs::read_dir("lib") {
-        Ok(output) => println!("filling lib dir"),
-        Err(err) => {
-            match err.kind() {
-                ErrorKind::NotFound => println!("not found lib dir"),
-                _ => println!("not known err"),
-            }
-        }
+    match fs::create_dir("core") {
+        Ok(res) => println!("handled"),
+        Err(err) => println!("err ocurred"),
     };
-    
-    match fs::read_dir("src") {
-        Ok(output) => println!("filling src dir"),
-        Err(err) => {
-            match err.kind() {
-                ErrorKind::NotFound => println!("not found src dir"),
-                _ => println!("not known err"),
-            }
-        }
+    match fs::create_dir("libs") {
+        Ok(res) => println!("handled"),
+        Err(err) => println!("err ocurred"),
     };
 }
 
-fn single_carpet(){
-    match fs::create_dir("") {
-        Ok(out) => println!("carpet ready"),
+fn project_files(){
+
+    let folders:[&str;3] = ["tests", "libs", "core"];
+    
+    for folder in folders.iter(){
+        match fs::read_dir(folder) {
+            Ok(_out) => { 
+                println!("filling {} dir", folder);
+                let path:&str = &(folder.clone().to_owned() + "/mod.rs");
+                match fs::write(path, "".to_string()) {
+                    Ok(_out) => println!("mod created"),
+                    Err(err) => {
+                        match err.kind() {
+                            ErrorKind::NotFound => println!("not found"),
+                            ErrorKind::PermissionDenied => println!("permission denied"),
+                            _ => println!("unknown error"),
+                        }
+                    },
+                };
+            },
+            Err(err) => {
+                match err.kind() {
+                    ErrorKind::NotFound => println!("not {} tests dir", folder),
+                    _ => println!("not knowing err"),
+                }
+            },
+        };    
+    }
+   
+}
+
+fn single_carpet(carpet:String){
+
+    match fs::create_dir(carpet.to_string()) {
+        Ok(_) => {
+            println!("carpet ready");
+            let path:&str = &("src/"+ carpet.to_owned() + "/mod.rs");
+            match fs::write(path, "".to_string()){
+                Ok(_) => println!("file created"),
+                Err(err) => {
+                    match err.kind() {
+                        ErrorKind::PermissionDenied => println!("permission denied"),
+                        _=> println!("unknown error"),
+                    };
+                },
+            };
+
+        },
         Err(err) => {
             match err.kind(){
                 ErrorKind::NotFound => println!("not found carpet"),
@@ -121,37 +136,51 @@ fn single_carpet(){
     };
 }
 
-fn project_init(){
+fn project_init(_project:String){
     project_carpets();
     project_files();
 }
 
 pub fn switch_action(command:&Command){
+    let limit:usize = command.flags.len();
+
     if command.action == "new" {
         
         let mut counter = 0;
  
         loop {
             if command.flags[counter] == "-f" {
-                create_file(command.target, command.flags);
-                println!("creating file");
-            }
-
-            if command.flags[counter] == "-c" {
-                create_carpet();
+                create_file(command.target.clone(), command.flags.clone());
             }
 
             if command.flags[counter] == "-p" {
-                project_init(command.target);
+                project_init(command.target.clone());
             }
+
+            if counter == limit {
+                break;
+            }        
 
             counter += 1;
         }
     }
+    else if command.action == "add" {
+        single_carpet(command.target.clone());
+    }
     else if command.action == "free" {
+        deletea::free_cache();
         println!("freeing");
     }
     else if command.action == "delete" {
+        if check_type_target() == "file" {
+            deletea::delete_file(command.target.clone());
+        }
+        else if check_type_target() == "carpet" {
+            deletea::delete_folder(command.target.clone());
+        }
+        else if check_type_target() == "project" {
+            deletea::delete_project();
+        }
         println!("deleting");
     }
     else if command.action == "open" {

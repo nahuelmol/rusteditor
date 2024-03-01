@@ -26,8 +26,6 @@ impl Command {
 
 fn main() {
 
-    let available_commands:[&str;6] = ["edit", "new", "delete", "open", "build", "ask"];
-
     let mut myargs: Vec<String> = Vec::new();
     for arg in env::args() {
         myargs.push(arg);
@@ -35,5 +33,4 @@ fn main() {
 
     let command = Command::new(myargs);
     file_fns::switch_action(&command);
-        
 }
