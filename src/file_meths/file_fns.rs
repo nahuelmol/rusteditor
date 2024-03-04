@@ -6,7 +6,7 @@ use chrono::prelude::Local;
 use chrono::prelude::Utc;
 
 use crate::file_meths::deletea;
-use crate::file_meths::checker::check_type_target;
+use crate::file_meths::checker::{check_type_target, check_app_name};
 use crate::Command;
 
 pub fn save_file_cnt(file:String) {
@@ -197,6 +197,10 @@ pub fn switch_action(command:&Command){
             deletea::delete_project();
         }
         println!("deleting");
+    }
+    else if command.action == "get" {
+        let appname = check_app_name();
+        println!("opening {}", appname);
     }
     else if command.action == "open" {
         println!("opening");
