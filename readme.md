@@ -1,3 +1,9 @@
+<div>
+  <img src="https://img.shields.io/github/last-commit/nahuelmol/rusteditor"/>
+  <img src="https://img.shields.io/github/languages/code-size/nahuelmol/rusteditor"/>
+  <img src="https://img.shields.io/github/languages/top/nahuelmol/rusteditor"/>
+</div>
+
 ### **Details::how this works**
 
 you start writing
@@ -44,3 +50,16 @@ lee add db
 ```
 
 db is now linked to the current project and could be accessed anywhere
+
+<br>
+<br>
+
+### deleting project
+
+projects can be deleted by using the following command
+
+```
+lee delete app -p
+```
+
+"app" is the name of the current project and -p says that it is about a project
