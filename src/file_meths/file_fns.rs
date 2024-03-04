@@ -2,13 +2,16 @@ use std::fs;
 use std::io::ErrorKind;
 use std::io::stdin;
 
-use crate::file_meths::deletea;
+use chrono::prelude::Local;
+use chrono::prelude::Utc;
 
+use crate::file_meths::deletea;
+use crate::file_meths::checker::check_type_target;
 use crate::Command;
 
 pub fn save_file_cnt(file:String) {
-    let s = match fs::read_to_string(file.clone()) {
-        Ok(output) => { 
+    match fs::read_to_string(file.clone()) {
+        Ok(_output) => { 
             println!("there's a result")
         },
         Err(err) => { 
@@ -26,7 +29,6 @@ pub fn save_file_cnt(file:String) {
 
 pub fn create_file(filename:String, flags:Vec<String>) {
     let mut content:String = String::new();
-    let actions:Vec<&str> = vec!["-in", "-m"];
 
     let mut counter:usize = 0;
     let flags_len = flags.len();
@@ -51,7 +53,7 @@ pub fn create_file(filename:String, flags:Vec<String>) {
     }
 
     match fs::write(filename.clone(), content) {
-        Ok(out) => {
+        Ok(_out) => {
             println!("greate")
         },
         Err(e) => {
@@ -64,18 +66,14 @@ pub fn create_file(filename:String, flags:Vec<String>) {
 
 
 fn project_carpets(){
-    match fs::create_dir("tests") {
-        Ok(res) => println!("handled"),
-        Err(err) => println!("err ocurred"),
-    };
-    match fs::create_dir("core") {
-        Ok(res) => println!("handled"),
-        Err(err) => println!("err ocurred"),
-    };
-    match fs::create_dir("libs") {
-        Ok(res) => println!("handled"),
-        Err(err) => println!("err ocurred"),
-    };
+    let folders:[&str;3] = ["tests", "libs", "core"];
+
+    for folder in folders.iter() {
+        match fs::create_dir(folder) {
+            Ok(out) => println!("output {:?}", out),
+            Err(err)=> println!("err: {:?}", err),
+        };
+    }
 }
 
 fn project_files(){
@@ -92,7 +90,7 @@ fn project_files(){
                     Err(err) => {
                         match err.kind() {
                             ErrorKind::NotFound => println!("not found"),
-                            ErrorKind::PermissionDenied => println!("permission denied"),
+                            ErrorKind::PermissionDenied => println!("denied"),
                             _ => println!("unknown error"),
                         }
                     },
@@ -112,9 +110,9 @@ fn project_files(){
 fn single_carpet(carpet:String){
 
     match fs::create_dir(carpet.to_string()) {
-        Ok(_) => {
-            println!("carpet ready");
-            let path:&str = &("src/"+ carpet.to_owned() + "/mod.rs");
+        Ok(out) => {
+            println!("carpet ready {:?}", out);
+            let path:&str = &format!("stc/{}/mod.rs", carpet).to_string();
             match fs::write(path, "".to_string()){
                 Ok(_) => println!("file created"),
                 Err(err) => {
@@ -136,7 +134,21 @@ fn single_carpet(carpet:String){
     };
 }
 
-fn project_init(_project:String){
+fn project_init(project:String){
+    let local_time = Local::now();
+    let utc_time = Utc::now();
+   
+    let name_project = format!("'name' : '{}'",project.to_string());
+    let date_loc = format!("'date_local':'{}'", local_time);
+    let date_utc = format!("'date_utc' : '{}'", utc_time);
+
+    let entire_config = format!("{{\n{}\n{}\n{} }}", name_project, date_loc, date_utc);
+    
+    match fs::write("config.js", entire_config) {
+        Ok(_out) => println!("file created"),
+        Err(_ere) => println!("err ocured"),
+    };
+
     project_carpets();
     project_files();
 }
@@ -172,13 +184,16 @@ pub fn switch_action(command:&Command){
         println!("freeing");
     }
     else if command.action == "delete" {
-        if check_type_target() == "file" {
+
+        let del_type = check_type_target(&command.flags);
+
+        if del_type == "file" {
             deletea::delete_file(command.target.clone());
         }
-        else if check_type_target() == "carpet" {
+        else if del_type == "carpet" {
             deletea::delete_folder(command.target.clone());
         }
-        else if check_type_target() == "project" {
+        else if del_type == "project" {
             deletea::delete_project();
         }
         println!("deleting");
