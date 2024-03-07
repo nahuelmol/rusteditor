@@ -8,7 +8,6 @@ use serde_json;
 use serde_json::{json, Value};
 
 pub fn edit_file(filename:String) {
-
     match fs::metadata(filename.clone()) {
         Ok(out) => println!("metadata obtained"),
         Err(err)=> { 

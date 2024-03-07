@@ -1,5 +1,5 @@
 [package]
-name = "codeeditor"
+name = "lee"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.34"
 serde_json = "1.0.114"
+reqwest = "=0.10.10"
+tokio = "1.36.0"
