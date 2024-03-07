@@ -3,8 +3,6 @@ use std::fs;
 use serde_json::Value;
 use serde_json;
 
-use std::io::BufReader;
-
 use chrono::prelude::Local;
 use chrono::prelude::Utc;
 
