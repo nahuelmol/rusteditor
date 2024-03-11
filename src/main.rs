@@ -57,12 +57,10 @@ impl Command {
 }
 
 fn main() {
-
     let mut myargs: Vec<String> = Vec::new();
     for arg in env::args() {
         myargs.push(arg);
     };
-
     let command = Command::new(myargs);
     switch_action(&command);
 }
