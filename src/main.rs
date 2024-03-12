@@ -7,7 +7,6 @@ struct Command {
     action:String,
     target:String,
     flags:Vec<String>,
-
     just_action:bool,
     if_flags:bool,
     valid_command:bool,
