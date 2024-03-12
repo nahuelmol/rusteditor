@@ -24,9 +24,8 @@ lee new index.txt -f -in
 * -in: we are going to insert text, then the editor opens
 
 <br>
-<br>
 
-### creating a project
+### creating a WASM project
 
 lee defines project as an structure of folder or files
 
@@ -39,7 +38,6 @@ lee new myproject -p
 projects have default carpets like src, tests
 
 <br>
-<br>
 
 ### adding a carpet
 
@@ -51,8 +49,22 @@ lee add db
 
 db is now linked to the current project and could be accessed anywhere
 
+
 <br>
+
+### express project
+
+```
+lee new myproject -exp
+```
+
 <br>
+
+### docker support
+
+```
+lee new mydocker -docker
+```
 
 ### deleting project
 
