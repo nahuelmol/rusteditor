@@ -139,7 +139,7 @@ fn add_ui(){
     }
 }
 
-pub fn clang_project(){
+pub fn cpp_project(){
 
     match fs::write("Makefile"){
         Ok(_) => seed_makefile(),

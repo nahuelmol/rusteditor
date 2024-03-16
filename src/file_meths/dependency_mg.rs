@@ -66,9 +66,9 @@ pub fn dependency(){
         }
 
         if name {
-            name.push_str(&cs.to_string());
+            name.push(&cs.to_string());
         } else if {
-            nume.push_str(&cs.to_string());
+            nume.push(&cs.to_string());
         }
         println!("{}", cs);
     }

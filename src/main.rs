@@ -42,6 +42,7 @@ impl Command {
             target = String::from("");
 
             valid_command = false;
+            just_action = false;
         }
 
         Self { 

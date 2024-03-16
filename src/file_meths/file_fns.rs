@@ -5,9 +5,9 @@ use std::io::stdin;
 use chrono::prelude::Local;
 use chrono::prelude::Utc;
 
-use crate::file_mehts::express::express_project;
-use crate::file_mehts::docker::docker_project;
-use crate::file_meths::clang::clang_project;
+use crate::file_meths::express::express_project;
+use crate::file_meths::docker::docker_project;
+use crate::file_meths::clang::cpp_project;
 
 use crate::file_meths::builder::{ wasm_execution, parameters_adjustment };
 use crate::file_meths::dependency_mg::{ inject_deps, dependency };
@@ -161,7 +161,7 @@ fn project_init(command:&Command){
     let mut typeproject:String = String::new();
     let type_projects: Vec<&str>= vec!["wasm", "exp"]; 
     for flg in command.flags.iter() {
-        if flg == '-p' {
+        if flg == "-p" {
             typeon = true;
             continue;
         }
@@ -189,9 +189,9 @@ fn project_init(command:&Command){
     let date_loc        = format!("'date_local':'{}'", local_time);
     let date_utc        = format!("'date_utc':'{}'",   utc_time);
     let path_wsm        = format!("'wasmcore':'wasm/'");
-    let dependencies    = fromat!("'dependencies':\n['wasm-pack']\n}");
+    let dependencies    = format!("'dependencies':\n['wasm-pack']\n");
     let carpets         = format!("'carpets':[\n 'rustcore',\n ]");
-    let entire_config   = format!("{{\n{}\n{}\n{}\n{}\n}}", name_project, version, typeproject, date_loc, date_utc);
+    let entire_config   = format!("{{\n{}\n{}\n{}\n{}\n{}\n}}", name_project, version, typeproject, date_loc, date_utc);
     
     match fs::write("config.js", entire_config) {
         Ok(_out) => println!("file created"),
@@ -211,7 +211,7 @@ pub fn switch_action(command:&Command){
                 create_file(command.target.clone(), command.flags.clone())
             }
             else if flg == "-p" {
-                project_init();
+                project_init(command);
             } 
             else if flg == "-exp" {
                 express_project();
