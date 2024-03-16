@@ -9,7 +9,7 @@ use crate::file_meths::express::express_project;
 use crate::file_meths::docker::docker_project;
 use crate::file_meths::clang::cpp_project;
 
-use crate::file_meths::builder::{ wasm_execution, parameters_adjustment };
+use crate::file_meths::builder::{ wasm_execution, wasm_compilation };
 use crate::file_meths::dependency_mg::{ inject_deps, dependency };
 use crate::file_meths::{ edits, deletea, converter, download };
 use crate::file_meths::checker::{ check_type_target, check_app_name};
@@ -93,7 +93,7 @@ fn project_files(){
                     },
                 };
 
-                if folder == "rustcore" {
+                if folder.to_string() == "rustcore" {
                     let initpath: String = "rustcore/init.rs".to_string();
                     match fs::write(initpath, "".to_string()) {
                         Ok(_) => println!("init.rs made"),
@@ -106,7 +106,7 @@ fn project_files(){
                     }
                 }
                 
-                if folder == "js" {
+                if folder.to_string() == "js" {
                     let jspath: String = "js/init.js".to_string();
                     match fs::write(jspath, "".to_string()) {
                         Ok(_) => println!("init.js made"),
@@ -158,28 +158,20 @@ fn single_carpet(carpet:String){
 
 fn project_init(command:&Command){
     let mut typeon: bool = false;
-    let mut typeproject:String = String::new();
-    let type_projects: Vec<&str>= vec!["wasm", "exp"]; 
+    let mut projectname:String = String::new();
+    let mut counter = 0;
     for flg in command.flags.iter() {
         if flg == "-p" {
             typeon = true;
             continue;
-        }
-        if typeon {
-            typeproject = flg;
-            typeon = false;
-        }
-    }
-
-    for available_type in type_projects {
-        if typeproject == available_type {
-            println!("the project is available");
+        } else {
+            if typeon {
+                projectname = flg.to_string();
+                typeon = false;
+            }
         }
     }
-    if typeproject == "exp" {
-        start_express_project(command.target.clone());
-    }
-    let projectname:String = command.target.clone();
+    
     let local_time  = Local::now();
     let utc_time    = Utc::now();
    
@@ -217,7 +209,7 @@ pub fn switch_action(command:&Command){
                 express_project();
             }
             else if flg == "-cl" {
-                clang_project();
+                cpp_project();
             }
             else if flg == "-cpp" {
                 cpp_project();
@@ -289,7 +281,7 @@ pub fn switch_action(command:&Command){
         println!("ask");
     }
     else if command.action == "build" {
-        parameters_adjustment();
+        wasm_compilation();
         println!("build");
     }
     else if command.action == "executes" {

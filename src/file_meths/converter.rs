@@ -40,7 +40,6 @@ fn parser(content:String, inputf:String, outputf:String){
         }
     }
 
-
     if input_right && output_right {
         println!("convertsion is possible");
         println!("content: {}", content);

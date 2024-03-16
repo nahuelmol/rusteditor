@@ -1,6 +1,7 @@
 use serde_json;
 use serde_json::Value;
-
+use std::io::Write;
+use std::io::Read;
 use std::io;
 use std::fs;
 
@@ -11,15 +12,10 @@ fn config_exists() -> bool {
     }
 }
 pub fn inject_deps(){
-    let mut temporary = String::new();
     if !config_exists() {
         println!("not project detected");
         return;
     }
-    
-
-    let mut file = File::open("config.json").
-        expect("err opening config.json");
 
     match serde_json::from_str::<Value>("config.json") {
         Ok(value) => {
@@ -66,27 +62,44 @@ pub fn dependency(){
         }
 
         if name {
-            name.push(&cs.to_string());
-        } else if {
-            nume.push(&cs.to_string());
+            libname.push(cs);
+        } 
+
+        if nume {
+            version.push(cs);
         }
         println!("{}", cs);
     }
 
-    let mut file = File::open("config.json")
-        .expect("getting an error in config.json access");
-    file.read_to_string(&mut temporary)
-        .expect("error saving temporary content");
+    let mut file = match fs::File::open("config.json") {
+        Ok(file) => file,
+        Err(_err) => { 
+            println!("error opening config.json");
+            return;
+        }
+    };
+    match file.read_to_string(&mut temporary) {
+        Ok(_) => println!("not error"),
+        Err(_) => println!("error handled"),
+    }
     let json_config = serde_json::from_str(&mut temporary);
-    let json_config["dependency"] = format!("{}, \n '{}':'{}' \n",json_config["dependency"], libname, version);
+    let json_data: Value= match json_config {
+        Ok(json) => json,
+        Err(_) => { 
+            return;
+        },
+    };
+
+    let dependency = &json_data["dependency"];
+    let newdata = format!("{},\n'{}':'{}'\n",&dependency, libname, version).clone();
     drop(file);
 
-    let mut writable_file = OpenOptions::new()
+    let mut writable_file = fs::OpenOptions::new()
         .write(true)
         .truncate(true)
         .open("config.json")
         .expect("failed updating the file");
 
-    writable_file.write_all(json_config.to_string().as_bytes())
+    writable_file.write_all(newdata.as_bytes())
         .expect("error writing file");
 }

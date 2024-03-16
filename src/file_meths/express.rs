@@ -1,27 +1,28 @@
 use std::fs;
 use std::io::ErrorKind;
 
-fn routes_content() -> [&str;2] {
-    let api_route_cnt = String::from(r#"
+fn routes_content() -> Vec<String> {
+    let api_route_cnt = r#"
                                        var express = require("express");
                                        var router = express.Router();
 
                                        const { apifirst } = require("../controllers/api_routes.js");
 
                                        router.get('/api1', apifirst);
-                                       module.exports = router;"#);
-    let normal_route_cnt = String::from(r#"
+                                       module.exports = router;"#;
+    let normal_route_cnt = r#"
                                        var express = require("express");
                                        var router = express.Router();
 
                                        const { home } = require("../controllers/http_routes.js");
 
                                        router.get('/home', home);
-                                       module.exports = router;"#);
-
-    let api:&str = api_route_cnt.as_str();
-    let norm:&str= normal_route_cnt.as_str();
-    return [api, norm];
+                                       module.exports = router;"#;
+    
+    let mut contents: Vec<String> = Vec::new();
+    contents.push(api_route_cnt.to_string());
+    contents.push(normal_route_cnt.to_string());
+    return contents;
 }
 
 fn mongoose() {
@@ -38,7 +39,7 @@ fn mongoose() {
     }
 
     let files:[&str;2] = ["models.js", "conn.js"];
-    let conn = String::from(r#"
+    let conn = r#"
                             const mongoose = require("mongoose")
                             mongoose.set("strictQuery", false)
                             const mongoDB = "mongodb:://127.0.0.1/defaultdb"
@@ -47,8 +48,8 @@ fn mongoose() {
                             async function main(){
                                 await mongoose.connect(mongoDB);
                             }
-                            "#);
-    let db_models = String::from(r#"
+                            "#;
+    let db_models = r#"
                                  cosnt mongoose = require("mongoose")
                                  const schema = mongoose.Schema;
 
@@ -61,18 +62,17 @@ fn mongoose() {
                                  const GeericUser = new Schema(config)
 
                                  const User = mongoose.model("User", GenericUser)
-                                 "#);
+                                 "#;
 
     for file in files.iter() {
-
         let mut content = String::new();
 
-        if file == "models.js" { 
-            content = db_models;
-        } else if file == "conn.js" { 
-            content = conn; 
+        if file.to_string()  == "models.js" { 
+            content = db_models.to_string();
+        } else if file.to_string() == "conn.js" { 
+            content = conn.to_string(); 
         } else {
-            content  = "".to_string();
+            content  = String::from("");
         }
         let path = format!("db/{}", file);
         match fs::write(path, content) {
@@ -93,7 +93,7 @@ fn mongoose() {
 
 }
 
-fn db_content() -> [&str;2] {
+fn db_content() -> Vec<String> {
     let db_content_conn = String::from(r#"
                                         const { Client } = require('pg');
 
@@ -117,15 +117,15 @@ fn db_content() -> [&str;2] {
                                             console.log(res.rows);
                                             client.end;
                                         });"#);
-    let qery:&str = db_content_qery.as_str();
-    let conn:&str = db_content_conn.as_str();
-    let contents:[&str;2] = [qery, conn];
+    let mut contents: Vec<String> = Vec::new();
+    contents.push(db_content_conn);
+    contents.push(db_content_qery);
     return contents;
 }
 
 pub fn express_project(){
-    let dirs:[&str,2]= ["routes", "db"];
-    let files:[&str,3]=[".gitignore", ".env", "package.json"];
+    let dirs = vec!["routes", "db"];
+    let files= vec![".gitignore", ".env", "package.json"];
     let devfield:String= String::from(r#"
                                         'dev':[\n
                                             'url':'https://github.com'\n
@@ -151,12 +151,12 @@ pub fn express_project(){
     let ignored_cnt:String = String::from("/node_modules\n");
     for file in files.iter() {
         let mut content = String::new(); 
-        if file == "package.json" {
-            content = package_cnt;
-        } else if file == ".gitignore" {
-            content = ignored_cnt;
-        } else if file == ".env" {
-            content = env_cnt;
+        if file.to_string() == "package.json" {
+            content = package_cnt.clone();
+        } else if file.to_string() == ".gitignore" {
+            content = ignored_cnt.clone();
+        } else if file.to_string() == ".env" {
+            content = env_cnt.clone();
         }
         match fs::write(file, content){
             Ok(_) => println!("{} created", file),
@@ -190,20 +190,22 @@ pub fn express_project(){
                                     });
                                 "#);
     for dir in dirs.iter() {
-        let mut contents:[&str; 2];
-        let mut files:[&str;2];
-        if dir == "routes" {
+        let mut contents:Vec<String>  = Vec::new();
+        let mut filesin:Vec<String> = Vec::new();
+        if dir.to_string() == "routes" {
             contents = routes_content();
-            files = ["routes.js", "apiroutes.js"];
-        } else if dir == "db" {
+            filesin.push("routes.js".to_string());
+            filesin.push("apiroutes.js".to_string());
+        } else if dir.to_string() == "db" {
             contents = db_content();
-            files = ["conn.js", "queries.js"];
+            filesin.push("conn.js".to_string());
+            filesin.push("queries.js".to_string());
         }
-        let counter:u32 = 0;
+        let mut counter:usize = 0;
 
-        for file in files.iter() {
+        for file in filesin.iter() {
             let path = format!("{}/{}", dir, file);
-            match fs::write(path, contents[counter]) {
+            match fs::write(path, &contents[counter]) {
                 Ok(_) => println!("successfully created {}", file),
                 Err(err) => println!("e:{}", err),
             }

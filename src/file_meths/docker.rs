@@ -1,7 +1,9 @@
 use std::fs;
+use std::io::ErrorKind;
 use std::io;
-fn filling_laravel_deploy() -> String {
-    let content:String = r#"
+
+fn filling_laravel_deploy() -> std::string::String {
+    let content = r#"
         
         #!/usr/bin/env bash
         echo "Running composer"
@@ -21,11 +23,11 @@ fn filling_laravel_deploy() -> String {
         php artisan migrate --force
 
         "#;
-    return content;
+    return content.to_string();
 }
 
 fn filling_nginx_conf() -> String {
-    let mut:content String = r#"
+    let mut content: String = r#"
 
         server {
           listen 80;
@@ -83,7 +85,7 @@ fn filling_nginx_conf() -> String {
             deny all;
           }
         }
-        "#;
+        "#.to_string();
 
         return content;
 }
@@ -91,8 +93,8 @@ fn filling_nginx_conf() -> String {
 fn create_conf_nginx(path:&str) {
     let file_path = format!("{}/nginx-site.conf", path);
     let content = filling_nginx_conf();
-    match fs::write(file_path, content){
-        Ok(_) => println!("{} created", file),
+    match fs::write(file_path.clone(), content){
+        Ok(_) => println!("{} created", file_path),
         Err(err) => eprintln!("err creating {}", err),
     };
 }
@@ -110,7 +112,7 @@ pub fn docker_project(){
 
     let opc:i32 = match docker_type.parse() {
         Ok(num) => num,
-        Err(e) => eprintln!("error with opc"),
+        Err(e) => 5,
     };
     if opc == 1 {}
     else if opc == 2 {}
@@ -129,10 +131,11 @@ pub fn docker_project(){
 
         CMD
         "#;
-    let files:[&str;1] = ["start.sh", "Dockerfile"];
+    let files:[&str;2] = ["start.sh", "Dockerfile"];
     for file in files.iter(){
+        let content = if file.to_owned()  == "Dockerfile" { dockerfile_cnt } else { " " };
         match fs::write(file, content) {
-            Ok(_) => pritln!("{} created", file),
+            Ok(_) => println!("{} created", file),
             Err(e) => {
                 match e.kind() {
                     ErrorKind::PermissionDenied => println!("writing {} denied", file),
@@ -146,7 +149,7 @@ pub fn docker_project(){
         Ok(_) => {
             let path = "conf/nginx";
             match fs::create_dir(path) {
-                OK(_) => { 
+                Ok(_) => { 
                     println!("{} created", path);
                     create_conf_nginx(path);
                 },
@@ -164,7 +167,7 @@ pub fn docker_project(){
                             let path = "conf/nginx";
                             create_conf_nginx(path);
                         },
-                        Err(e) => eprinln!("error:{}", e),
+                        Err(e) => eprintln!("error:{}", e),
                     }
                 },
                 ErrorKind::PermissionDenied => {

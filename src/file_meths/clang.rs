@@ -1,4 +1,7 @@
 use std::io;
+use std::fs;
+use std::io::Write;
+use std::io::ErrorKind;
 
 fn seed_makefile(){
     /*
@@ -22,16 +25,13 @@ fn seed_makefile(){
         "#;
     match fs::metadata("Makefile"){
         Ok(_) => {
-            let mut file = match OpenOptions:new()
+            let mut file = fs::OpenOptions::new()
                 .append(true)
-                .open("Makefile") {
-                    /* difail is the file
-                     */
-                    Ok(difail) => difail,
-                    Err(err) => eprintln!("problem opening Makefile; {}", err),
-                };
-            file.write_all();
-
+                .open("Makefile");
+            
+            file.unwrap()
+                .write_all(b"some content")
+                .expect("error witing makefile");
         },
         Err(err) => {
             match err.kind() {
@@ -124,12 +124,14 @@ fn add_ui(){
         #include "interface.cpp"
         "#;
     let dir:&str = "UI";
-    let mut files:[&str, 2] = ["interface.h", "interface.cpp"];  
+    let mut files = vec!["interface.h", "interface.cpp"];  
     for file in files.iter() {
         let mut path:String = format!("{}/{}", dir, file);
         let mut content:String = String::new();
-        if file == "interface.h" {
-
+        if file.to_string() == "interface.h" {
+            content = ih_content.to_string();
+        } else if file.to_string() == "interface.cpp" {
+            content = icpp_content.to_string();
         }
 
         match fs::write(path, content) {
@@ -138,36 +140,38 @@ fn add_ui(){
         }
     }
 }
+fn add_db() {}
+fn seed_main_file() {}
 
 pub fn cpp_project(){
 
-    match fs::write("Makefile"){
+    match fs::write("Makefile", ""){
         Ok(_) => seed_makefile(),
         Err(e)=> eprintln!("Error writing the makefile: {}", e),
     }
 
-    match fs::write("main.cpp"){
+    match fs::write("main.cpp", ""){
         Ok(_) => seed_main_file(),
         Err(e)=> eprintln!("Error writing the main file: {}", e),
     }
 
-    println!("do your want a windows interface?");
+    println!("do your want a windows interface? [y/n]");
     let mut project_with_ui = String::new();
     io::stdin()
         .read_line(&mut project_with_ui)
         .expect("error entering UI response");
     
-    println!("do you want to add a db access point");
+    println!("do you want to add a db access point [y/n]");
     let mut project_with_db = String::new();
     io::stdin()
         .read_line(&mut project_with_db)
         .expect("error add db");
 
-    if project_with_ui {
+    if project_with_ui == "y"{
         add_ui();
     }
     
-    if project_with_db {
-        add_ui();
+    if project_with_db == "y" {
+        add_db();
     }
 }
