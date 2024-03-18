@@ -5,6 +5,7 @@ use std::io::stdin;
 use chrono::prelude::Local;
 use chrono::prelude::Utc;
 
+use crate::file_meths::utils::{ flag_taker, tool_presentation };
 use crate::file_meths::express::express_project;
 use crate::file_meths::docker::docker_project;
 use crate::file_meths::clang::cpp_project;
@@ -31,7 +32,7 @@ pub fn save_file_cnt(file:String) {
     };
 }
 
-pub fn create_file(filename:String, flags:Vec<String>) {
+pub fn create_file(filename:String, flags:&Vec<String>) {
     let mut content:String = String::new();
 
     let mut counter:usize = 0;
@@ -200,18 +201,19 @@ pub fn switch_action(command:&Command){
     if command.action == "new" {
         for flg in command.flags.iter() {
             if flg == "-f" {
-                create_file(command.target.clone(), command.flags.clone())
+                let target = flag_taker(&command.flags, "-f".to_string());
+                create_file(target,&command.flags);
             }
             else if flg == "-p" {
+                let target = flag_taker(&command.flags, "-p".to_string());
                 project_init(command);
             } 
             else if flg == "-exp" {
+                let target = flag_taker(&command.flags, "-exp".to_string());
                 express_project();
             }
-            else if flg == "-cl" {
-                cpp_project();
-            }
             else if flg == "-cpp" {
+                let target = flag_taker(&command.flags, "-cpp".to_string());
                 cpp_project();
             }
             else if flg == "-docker" {
@@ -223,6 +225,9 @@ pub fn switch_action(command:&Command){
         }
         
     }
+    else if command.action == "-help" {
+        tool_presentation();
+    }
     else if command.action == "inject" {
         /* this function just scane the dependencies in the config.json
          * and install them if they're not already installed
@@ -233,11 +238,13 @@ pub fn switch_action(command:&Command){
         /* this function writes a new dependency
          * inot the config.json file
         */
+        let target = flag_taker(&command.flags,"depends".to_string());
         dependency();
     }
 
     else if command.action == "add" {
-        single_carpet(command.target.clone());
+        let target = flag_taker(&command.flags,"add".to_string());
+        single_carpet(target);
     }
     else if command.action == "free" {
         deletea::free_cache();
@@ -245,13 +252,14 @@ pub fn switch_action(command:&Command){
     }
     else if command.action == "delete" {
 
+        let target = flag_taker(&command.flags,"delete".to_string());
         let del_type = check_type_target(&command.flags);
 
         if del_type == "file" {
-            deletea::delete_file(command.target.clone());
+            deletea::delete_file(target);
         }
         else if del_type == "carpet" {
-            deletea::delete_folder(command.target.clone());
+            deletea::delete_folder(target);
         }
         else if del_type == "project" {
             deletea::delete_project();
@@ -274,7 +282,8 @@ pub fn switch_action(command:&Command){
         println!("opening");
     }
     else if command.action == "edit" {
-        edits::edit_file(command.target.clone());
+        let target = flag_taker(&command.flags,"edit".to_string());
+        edits::edit_file(target);
         println!("edit");
     }
     else if command.action == "ask" {
