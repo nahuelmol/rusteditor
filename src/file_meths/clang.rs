@@ -7,7 +7,7 @@ fn seed_makefile(){
     /*
      * makef_cnf is "makefile content"
      */
-    let makef_cnt = r#"
+    let _makef_cnt = r#"
         OUT = out/out
         OUTTEST = tests/out
 
@@ -25,7 +25,7 @@ fn seed_makefile(){
         "#;
     match fs::metadata("Makefile"){
         Ok(_) => {
-            let mut file = fs::OpenOptions::new()
+            let file = fs::OpenOptions::new()
                 .append(true)
                 .open("Makefile");
             
@@ -124,9 +124,9 @@ fn add_ui(){
         #include "interface.cpp"
         "#;
     let dir:&str = "UI";
-    let mut files = vec!["interface.h", "interface.cpp"];  
+    let files = vec!["interface.h", "interface.cpp"];  
     for file in files.iter() {
-        let mut path:String = format!("{}/{}", dir, file);
+        let path:String = format!("{}/{}", dir, file);
         let mut content:String = String::new();
         if file.to_string() == "interface.h" {
             content = ih_content.to_string();
@@ -136,7 +136,7 @@ fn add_ui(){
 
         match fs::write(path, content) {
             Ok(_) => println!("{} created", file),
-            Err(e) => println!("Error writing {}", file),
+            Err(_) => println!("Error writing {}", file),
         }
     }
 }

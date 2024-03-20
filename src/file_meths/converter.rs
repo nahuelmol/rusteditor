@@ -1,27 +1,27 @@
 use crate::Command;
+use crate::file_meths::utils::{ flag_taker };
 
 pub fn convert(command:&Command){
+    let mut input: bool = false;
+    let mut output:bool = false;
+ 
     for flg in command.flags.iter(){
-        let mut input: bool = false;
-        let mut output:bool = false;
-
-        let mut in_format = String::new();
-        let mut out_format = String::new();
-
-        if input {
-            in_format = flg.to_string();
-            println!("the input format is {}", in_format);
-        } else if flg == "-inp" {
+   
+        if flg == "-inp" {
             input = true;
         }
 
-        if output {
-            out_format = flg.to_string();
-            println!("the output format is {}", out_format);
-        } else if flg == "-out" {
-            output= true; 
+        if flg == "-oup" {
+            output = true;
         }
     };
+
+    if input && output {
+        let target = flag_taker(&command.flags,"-t".to_string());
+        let inputf = flag_taker(&command.flags,"-inp".to_string());
+        let outputf= flag_taker(&command.flags,"-oup".to_string());
+        parser(target, inputf, outputf);
+    }
 }
 
 

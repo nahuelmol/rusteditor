@@ -27,7 +27,7 @@ fn filling_laravel_deploy() -> std::string::String {
 }
 
 fn filling_nginx_conf() -> String {
-    let mut content: String = r#"
+    let content: String = r#"
 
         server {
           listen 80;
@@ -112,7 +112,7 @@ pub fn docker_project(){
 
     let opc:i32 = match docker_type.parse() {
         Ok(num) => num,
-        Err(e) => 5,
+        Err(_) => 5,
     };
     if opc == 1 {}
     else if opc == 2 {}

@@ -17,20 +17,6 @@ use crate::file_meths::checker::{ check_type_target, check_app_name};
 
 use crate::Command;
 
-pub fn save_file_cnt(file:String) {
-    match fs::read_to_string(file.clone()) {
-        Ok(_) =>  println!("there's a result"),
-        Err(err) => { 
-            match err.kind() {
-                ErrorKind::NotFound => { 
-                    println!("file not found");
-                },
-                ErrorKind::PermissionDenied => println!("permission"),
-                _ => println!("unknown error"),
-            }
-        },
-    };
-}
 
 pub fn create_file(filename:String, flags:&Vec<String>) {
     let mut content:String = String::new();
@@ -160,7 +146,6 @@ fn single_carpet(carpet:String){
 fn project_init(command:&Command){
     let mut typeon: bool = false;
     let mut projectname:String = String::new();
-    let mut counter = 0;
     for flg in command.flags.iter() {
         if flg == "-p" {
             typeon = true;
@@ -181,9 +166,9 @@ fn project_init(command:&Command){
     let typeproject     = format!("'type':'WASM'");
     let date_loc        = format!("'date_local':'{}'", local_time);
     let date_utc        = format!("'date_utc':'{}'",   utc_time);
-    let path_wsm        = format!("'wasmcore':'wasm/'");
-    let dependencies    = format!("'dependencies':\n['wasm-pack']\n");
-    let carpets         = format!("'carpets':[\n 'rustcore',\n ]");
+    let _path_wsm        = format!("'wasmcore':'wasm/'");
+    let _dependencies    = format!("'dependencies':\n['wasm-pack']\n");
+    let _carpets         = format!("'carpets':[\n 'rustcore',\n ]");
     let entire_config   = format!("{{\n{}\n{}\n{}\n{}\n{}\n}}", name_project, version, typeproject, date_loc, date_utc);
     
     match fs::write("config.js", entire_config) {
@@ -196,7 +181,6 @@ fn project_init(command:&Command){
 }
 
 pub fn switch_action(command:&Command){
-    let limit:usize = command.flags.len();
 
     if command.action == "new" {
         for flg in command.flags.iter() {
@@ -205,15 +189,15 @@ pub fn switch_action(command:&Command){
                 create_file(target,&command.flags);
             }
             else if flg == "-p" {
-                let target = flag_taker(&command.flags, "-p".to_string());
+                let _target = flag_taker(&command.flags, "-p".to_string());
                 project_init(command);
             } 
             else if flg == "-exp" {
-                let target = flag_taker(&command.flags, "-exp".to_string());
+                let _target = flag_taker(&command.flags, "-exp".to_string());
                 express_project();
             }
             else if flg == "-cpp" {
-                let target = flag_taker(&command.flags, "-cpp".to_string());
+                let _target = flag_taker(&command.flags, "-cpp".to_string());
                 cpp_project();
             }
             else if flg == "-docker" {
@@ -238,7 +222,7 @@ pub fn switch_action(command:&Command){
         /* this function writes a new dependency
          * inot the config.json file
         */
-        let target = flag_taker(&command.flags,"depends".to_string());
+        let _target = flag_taker(&command.flags,"depends".to_string());
         dependency();
     }
 
@@ -285,6 +269,10 @@ pub fn switch_action(command:&Command){
         let target = flag_taker(&command.flags,"edit".to_string());
         edits::edit_file(target);
         println!("edit");
+    }
+    else if command.action == "appnn" {
+        //appnn -> app new name
+        edits::set_appname(&command)
     }
     else if command.action == "ask" {
         println!("ask");

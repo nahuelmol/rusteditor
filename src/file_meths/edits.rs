@@ -1,6 +1,9 @@
 use std::io;
 use std::fs;
 
+use crate::Command;
+
+use crate::file_meths::utils::flag_taker;
 use std::fs::{ File, OpenOptions};
 use std::io::{ Read, Write, ErrorKind};
 
@@ -9,7 +12,7 @@ use serde_json::{json, Value};
 
 pub fn edit_file(filename:String) {
     match fs::metadata(filename.clone()) {
-        Ok(out) => println!("metadata obtained"),
+        Ok(_) => println!("metadata obtained"),
         Err(err)=> { 
             match err.kind() {
                 ErrorKind::NotFound => println!("not found"),
@@ -55,7 +58,8 @@ pub fn edit_file(filename:String) {
         .expect("error writing file");
 }
 
-pub fn set_appname(newname:String){
+pub fn set_appname(command:&Command){
+    let newname = flag_taker(&command.flags,"nn".to_string());
     let mut temporary = String::new();
     let exists:bool = match fs::metadata("config.json") {
         Ok(_) => true,

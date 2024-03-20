@@ -2,4 +2,5 @@
 /core
 /libs
 /some
+/tests
 config.json

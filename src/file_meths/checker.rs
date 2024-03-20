@@ -3,15 +3,6 @@ use std::fs;
 use serde_json::Value;
 use serde_json;
 
-use chrono::prelude::Local;
-use chrono::prelude::Utc;
-
-struct ConfigName {
-    name:String,
-    date1:Local,
-    date2:Utc,
-}
-
 pub fn check_app_name() -> String {
     let config_path = "config.js";
     let mut appname:String = String::new();

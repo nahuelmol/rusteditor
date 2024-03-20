@@ -1,5 +1,6 @@
 use std::fs;
 use std::io::ErrorKind;
+use std::io;
 
 fn routes_content() -> Vec<String> {
     let api_route_cnt = r#"
@@ -65,7 +66,7 @@ fn mongoose() {
                                  "#;
 
     for file in files.iter() {
-        let mut content = String::new();
+        let content:String;
 
         if file.to_string()  == "models.js" { 
             content = db_models.to_string();
@@ -86,11 +87,8 @@ fn mongoose() {
                     println!("unknown error writing {file}")
                 }
             },
-
         }
     }
-
-
 }
 
 fn db_content() -> Vec<String> {
@@ -164,7 +162,7 @@ pub fn express_project(){
         }
     }
 
-    let app_file = String::from(r#"
+    let _app_file = String::from(r#"
                                     var express = require("express")
                                     var app = express()
 
@@ -179,7 +177,7 @@ pub fn express_project(){
                                     app.set('port', porcess.env.HTTP_SERVER_PORT);
 
                                     module.exports = app;"#);
-    let server_file = String::from(r#"
+    let _server_file = String::from(r#"
                                     const dotenv = require("dotenv");
                                     dotenv.config();
 
@@ -197,9 +195,21 @@ pub fn express_project(){
             filesin.push("routes.js".to_string());
             filesin.push("apiroutes.js".to_string());
         } else if dir.to_string() == "db" {
-            contents = db_content();
-            filesin.push("conn.js".to_string());
-            filesin.push("queries.js".to_string());
+            println!("just selelct your favorite db\n1.mongoose\n2.Sqlite\n3.default");
+            let mut response = String::new();
+            io::stdin()
+                .read_line(&mut response)
+                .expect("error selecting the db");
+
+            if response == "1" {
+                mongoose();
+            } else if response == "2" {
+                println!("making the sqlite function");
+            } else if response == "3" {
+                contents = db_content();
+                filesin.push("conn.js".to_string());
+                filesin.push("queries.js".to_string());
+            }
         }
         let mut counter:usize = 0;
 
@@ -213,5 +223,4 @@ pub fn express_project(){
         }
     }
 }
-
 
