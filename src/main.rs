@@ -1,17 +1,22 @@
 use std::env;
 
 mod file_meths;
+mod help;
+
 use file_meths::file_fns::switch_action;
+use help::helpers::help_msg;
 
 struct Command {
     action:String,
     flags:Vec<String>,
+    valid:bool,
 }
 
 impl Command {
     fn new(args:Vec<String>) -> Self {
         let mut flags:Vec<String> = Vec::new();
         let mut action:String = String::new();
+        let valid:bool;
         
         if args.len() >= 1 {
             let possible_action = args[0].clone();
@@ -20,17 +25,18 @@ impl Command {
                 for flg in &args[1..] {
                     flags.push(flg.clone())
                 }
+                valid = true;
             } else {
-                println!("the command is not available");
+                valid = false;
             }
         } else {
-            println!("there's not a command");
-            println!("please type lee -help");
+            valid = false;
         }
 
         Self { 
             action,
             flags,     
+            valid,
         }
     }
 
@@ -51,5 +57,10 @@ fn main() {
         myargs.push(arg);
     };
     let command = Command::new(myargs); 
-    switch_action(&command);
+    if !command.valid {
+        println!("the command is not a valid command");
+        help_msg();
+    } else {
+        switch_action(&command);
+    }
 }
