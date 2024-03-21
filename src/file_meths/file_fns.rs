@@ -188,8 +188,8 @@ pub fn switch_action(command:&Command){
                 let target = flag_taker(&command.flags, "-f".to_string());
                 create_file(target,&command.flags);
             }
-            else if flg == "-p" {
-                let _target = flag_taker(&command.flags, "-p".to_string());
+            else if flg == "-wasm" {
+                let _target = flag_taker(&command.flags, "-wasm".to_string());
                 project_init(command);
             } 
             else if flg == "-exp" {
@@ -210,7 +210,9 @@ pub fn switch_action(command:&Command){
         
     }
     else if command.action == "-help" {
-        tool_presentation();
+
+        let tgt = flag_taker(&commad.flags, "-help".to_string());
+        tool_presentation(tgt);
     }
     else if command.action == "inject" {
         /* this function just scane the dependencies in the config.json
@@ -265,7 +267,7 @@ pub fn switch_action(command:&Command){
     else if command.action == "open" {
         println!("opening");
     }
-    else if command.action == "edit" {
+    else if command.action == "edt" {
         let target = flag_taker(&command.flags,"edit".to_string());
         edits::edit_file(target);
         println!("edit");
