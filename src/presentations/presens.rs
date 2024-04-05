@@ -1,3 +1,15 @@
+pub fn tool_presentation(command:String){
+    if command == "new".to_string() {
+        new_presentation();
+    } else if command == "delete".to_string() {
+        del_presentation();
+    } else if command == "edit".to_string() {
+        edt_presentation();
+    } else {
+        gen_presentation();
+    }
+}
+
 pub fn new_presentation(){
     let message = r#"
         new stands for creating new projects
@@ -5,7 +17,7 @@ pub fn new_presentation(){
         lee new -[f or p] -[typeproject]            [projectname]
 
         "#;
-    println!(message);
+    println!("{}",message);
 }
 pub fn edt_presentation(){
     let message = r#"
@@ -23,7 +35,7 @@ pub fn edt_presentation(){
             -pversion               change version
             -reintalld              reinstalls dependencies
         "#;
-    println!(message)
+    println!("{}", message)
 
 }
 pub fn del_presentation(){
@@ -51,7 +63,7 @@ pub fn del_presentation(){
         lee del [filename] 
         "#;
 
-    println!(message);
+    println!("{}", message);
 }
 
 pub fn gen_presentation(){
@@ -62,7 +74,7 @@ pub fn gen_presentation(){
         edition
 
     "#;
-    println!(message);
+    println!("{}", message);
 
     new_presentation();
     del_presentation();

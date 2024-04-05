@@ -1,8 +1,6 @@
 use crate::Command;
 use reqwest::Client;
 use futures::executor::block_on;
-
-
 use crate::file_meths::utils::{ flag_taker };
 
 struct Credential {
@@ -25,7 +23,6 @@ pub fn download(command:&Command){
     let mut creds= String::new();
     let mut body = String::new();
     let mut dai = false;
-    let mut simp= true;
 
     for flg in command.flags.iter() {
 
@@ -38,18 +35,15 @@ pub fn download(command:&Command){
         } else if *flg == "-dai" {
             //dai is download and install
             dai = true;
-            simp= false;
         } else {
-            simp = true;
+            dai = false;
         }
 
     }
     if dai {
         download_and_install(url, creds.clone(), body.clone());
     } else {
-        if simp {
-            simple_download(url, creds, body);
-        }
+        simple_download(url, creds, body);
     } 
 }
 
@@ -67,6 +61,22 @@ async fn dareq(url:String) -> String {
             Err(e)=> format!("{}", e),
         };
     return body;
+}
+
+fn direct_file(url:String) -> bool {
+    let _available_file_fs = [".xz", ".xyz"];
+    let reversed_url:String = url.chars().rev().collect();
+    let mut termination:String = String::new();
+    for c in reversed_url.chars() {
+        termination = termination + c.to_string().as_str();
+        if c == '.' {
+            if termination.len() > 0 {
+                println!("termination: {}",termination);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 fn check_ftp(url:String) -> bool {
@@ -90,19 +100,28 @@ fn check_ftp(url:String) -> bool {
 
 pub fn download_and_install(url:String, credentials:String, _body:String){
     if !check_ftp(url.clone()) {
-        println!("please enter an available service (ftp)");
+        println!("please enter an available source(ftp)");
+        return;
+    }
+
+    if !direct_file(url.clone()){
+        println!("pls, enter a valid file format");
         return;
     }
     let result = block_on(dareq(url));
     let data:Vec<&str> = credentials.split(',').collect();
     let myid:u32 = match data[1].parse() {
         Ok(num) => num,
-        Err(_) => 0,
+        Err(err) => {
+            println!("error parsing data 1:{}", err);
+            0
+        },
     };
     let credential = Credential::new(data[0].to_string(), myid);
     println!("name:{}\nid:{}", credential.name, credential.id);
     println!("{}", result);
     //I must compare user's credentials with the credentail the APi is waiting for
+    //what is means install? I can use cmd tools like curls 
 }
 
 pub fn simple_download(url:String, credentials:String, _body:String){
@@ -110,11 +129,19 @@ pub fn simple_download(url:String, credentials:String, _body:String){
         println!("please enter an available service (ftp)");
         return;
     }
+    if !direct_file(url.clone()){
+        println!("pls, enter a valid file format");
+        return;
+    }
+
     let result = block_on(dareq(url));    
     let data:Vec<&str> = credentials.split(',').collect();
     let myid:u32 = match data[1].parse() {
         Ok(num) => num,
-        Err(_) => 0,
+        Err(err) => {
+            eprintln!("error parsing data 1:{}", err);
+            0
+        },
     };
     let credential = Credential::new(data[0].to_string(), myid);
     println!("name:{}\nid:{}", credential.name, credential.id);

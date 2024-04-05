@@ -1,43 +1,35 @@
+/*
+use crate::presentations::presens::new_presentation;
+use crate::presentations::presens::edt_presentation;
+use crate::presentations::presens::del_presentation;
+use crate::presentations::presens::gen_presentation;
+*/
 
-use crate::presentations::pres;
-
-pub fn one_single_target(&args) -> bool {
-    let possible_tgs:Vec<String> = vec!["-f", "-exp", "-docker", "-wasm", "-cpp"];
-
-    let mut counter:usize = 0;//counter fot the inner loop
-    let mut outcter:usize = 0;//counter for the outer loop
+pub fn one_single_target(args:&Vec<String>) -> bool {
+    let possible_tgs:Vec<String> = vec!["-p".to_string(),"-f".to_string(), "-exp".to_string(), "-docker".to_string(), "-wasm".to_string(), "-cpp".to_string()];
     let mut multiple:usize= 0;
-    'outter :loop {
-        possible_tgs[counter];
-        'inner :loop {
+
+    for out in possible_tgs.iter() {
+        for inn in args.iter() {
             if multiple >= 2 {
                 return false;
             }
-            
-            if args[outter] == possible_tgs[counter]{
+
+            if inn == out {
                 multiple+=1;
             };
-            outcter+=1;
         }
-        counter+=1;
     }
     true
 }
 
-
-pub fn tool_presentation(command:String){
-    if command == "new".to_sring() {
-        new_presentation();
-    } else if command == "delete".to_string() {
-        del_presentation();
-    } else if command == "edit".to_string() {
-        edt_presentation();
-    } else {
-        gen_presentation();
-    }
-}
-
 pub fn flag_taker(args:&Vec<String>, flag:String) -> String {
+    if one_single_target(args) {
+        println!("single target")
+    } else {
+        println!("multiple target");
+    }
+
     let mut open_name = false;
     let mut target  = String::new();
     for arg in args.iter() {

@@ -5,7 +5,9 @@ use std::io::stdin;
 use chrono::prelude::Local;
 use chrono::prelude::Utc;
 
-use crate::file_meths::utils::{ flag_taker, tool_presentation };
+use crate::presentations::presens::tool_presentation;
+
+use crate::file_meths::utils::flag_taker;
 use crate::file_meths::express::express_project;
 use crate::file_meths::docker::docker_project;
 use crate::file_meths::clang::cpp_project;
@@ -211,7 +213,7 @@ pub fn switch_action(command:&Command){
     }
     else if command.action == "-help" {
 
-        let tgt = flag_taker(&commad.flags, "-help".to_string());
+        let tgt = flag_taker(&command.flags, "-help".to_string());
         tool_presentation(tgt);
     }
     else if command.action == "inject" {

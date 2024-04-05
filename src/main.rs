@@ -1,12 +1,14 @@
 use std::env;
 
-mod file_meths;
+pub mod file_meths;
 mod help;
+mod presentations;
+
 
 use file_meths::file_fns::switch_action;
 use help::helpers::help_msg;
 
-struct Command {
+pub struct Command {
     action:String,
     flags:Vec<String>,
     valid:bool,
@@ -58,7 +60,7 @@ fn main() {
     };
     let command = Command::new(myargs); 
     if !command.valid {
-        println!("the command is not a valid command");
+        println!("the command is not valid");
         help_msg();
     } else {
         switch_action(&command);
