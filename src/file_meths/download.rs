@@ -3,14 +3,13 @@ use reqwest::Client;
 use futures::executor::block_on;
 use crate::file_meths::utils::{ flag_taker };
 
-struct Credential {
+pub struct Credential {
     name:String,
     id:u32,
 }
 
 impl Credential {
     fn new(name:String,id:u32) -> Self {
-
         Self {
             name,
             id,
@@ -58,21 +57,25 @@ async fn dareq(url:String) -> String {
                     Err(err) => format!("err: {}", err),
                 }
             },
-            Err(e)=> format!("{}", e),
+            Err(e)=> format!("err: {}", e),
         };
     return body;
 }
 
 fn direct_file(url:String) -> bool {
-    let _available_file_fs = [".xz", ".xyz"];
+    let available_fformat = [".xz", ".xyz"];
     let reversed_url:String = url.chars().rev().collect();
     let mut termination:String = String::new();
     for c in reversed_url.chars() {
-        termination = termination + c.to_string().as_str();
+        termination =  c.to_string() + &termination;
         if c == '.' {
             if termination.len() > 0 {
-                println!("termination: {}",termination);
-                return true;
+                for available in available_fformat.iter(){
+                    if termination ==  *available {
+                        return true;
+                    } 
+                }
+                return false;
             }
         }
     }
@@ -80,27 +83,106 @@ fn direct_file(url:String) -> bool {
 }
 
 fn check_ftp(url:String) -> bool {
-    let service = String::from("ftp://");
-    let mut counter:usize = 0;
+    let valid_prots = ["ftp:", "http:"];
     let mut urlservice = String::new();
     for c in url.chars() {
         urlservice.push(c);
-        if counter == 6 {
-            break;
+        if c == ':' {
+            for valid in valid_prots.iter() {
+                if urlservice == *valid {
+                    println!("{} is valid", urlservice);
+                    return true;
+                }
+            }
+            return false;
         }
-        counter += 1;
     }
+    return false;
+}
+fn tar_format(file) -> String {
+    let index = file.rfind('.');
+    let extension = &file[index..];
+    let mut flag:String;
+
+    if extension == ".xz" || extension == ".txz" {
+        //x stands for extract
+        flag = "-xJvf".to_string();
+    }
+    if else extension == ".gz" || extension == ".tgz" {
+        flag = "-xzvf".to_string();
+    }
+    if else extension == ".bz2" || extension ==".tbz2"{
+        flag = "-xjvf".to_string();
+    } 
+    if else extension == ".Z" {
+        flag = "-xZvf".to_string();
+    }
+    if else extension == ".lz" || extension == ".tlz" {
+        flag = "--lzma -xvf".to_string();
+    } 
+    if else extension == ".lz4" || extension == ".tlz4"{
+        flag = "--lz4 -xvf".to_string();
+    }
+    if else extension == ".sz" || extension == ".tsz" {
+        flag = "--zstd -xvf".to_string();
+    }
+    return flag;
+}
+
+fn install_extracted_pkg(){
+    let ins = Command::new("./configure")
+        .args()//I think there's not arguments for install
+        .output()
+        .expect("error executing ./configure");
     
-    if urlservice == service {
-        true
+    if ins.status.success() {
+        println!("installing");
     } else {
-        false
+        let err = String::from_utf8_lossy(&ins.stderr);
+        eprintln!("error extracting:{} ", err);
+        return;
     }
+
+    let ins = Command::new("./install.sh")
+        .args()//I think there's not arguments for install
+        .output()
+        .expect("error executing install.sh");
+
+    if ins.status.success() {
+        println!("installing");
+    } else {
+        let err = String::from_utf8_lossy(&ins.stderr);
+        eprintln!("error extracting:{} ", err);
+        return;
+    }
+}
+
+fn standard_installation(url){
+    let index = url.rfind('/');
+    let file  = &url[index..];
+
+    let flag = tar_format(file);
+
+    let output = Command::new("tar")
+        .args(&[flag, file])
+        .output()
+        .expect("Failed in tar execution");
+    
+    if output.status.success() {
+        println!("extraction completed");
+    } else {
+        let err = String::from_utf8_lossy(&output.stderr);
+        eprintln!("error extracting:{} ", err);
+        return;
+    }
+
+    
+
 }
 
 pub fn download_and_install(url:String, credentials:String, _body:String){
     if !check_ftp(url.clone()) {
-        println!("please enter an available source(ftp)");
+        println!("please enter an available source");
         return;
     }
 
@@ -110,7 +192,7 @@ pub fn download_and_install(url:String, credentials:String, _body:String){
     }
     let result = block_on(dareq(url));
     let data:Vec<&str> = credentials.split(',').collect();
-    let myid:u32 = match data[1].parse() {
+    let myid:u32 = match data[1].replace(" ", "").parse() {
         Ok(num) => num,
         Err(err) => {
             println!("error parsing data 1:{}", err);
@@ -118,16 +200,16 @@ pub fn download_and_install(url:String, credentials:String, _body:String){
         },
     };
     let credential = Credential::new(data[0].to_string(), myid);
-    println!("name:{}\nid:{}", credential.name, credential.id);
     println!("{}", result);
+    println!("name: {}", credential.name);
+    println!("id: {}", credential.id);
     //I must compare user's credentials with the credentail the APi is waiting for
     //what is means install? I can use cmd tools like curls 
 }
 
 pub fn simple_download(url:String, credentials:String, _body:String){
     if !check_ftp(url.clone()) {
-        println!("please enter an available service (ftp)");
-        return;
+        println!("please enter an available source(ftp)");
     }
     if !direct_file(url.clone()){
         println!("pls, enter a valid file format");
@@ -136,7 +218,7 @@ pub fn simple_download(url:String, credentials:String, _body:String){
 
     let result = block_on(dareq(url));    
     let data:Vec<&str> = credentials.split(',').collect();
-    let myid:u32 = match data[1].parse() {
+    let myid:u32 = match data[1].replace(" ", "").parse() {
         Ok(num) => num,
         Err(err) => {
             eprintln!("error parsing data 1:{}", err);
@@ -144,7 +226,7 @@ pub fn simple_download(url:String, credentials:String, _body:String){
         },
     };
     let credential = Credential::new(data[0].to_string(), myid);
-    println!("name:{}\nid:{}", credential.name, credential.id);
-    println!("result:{}", result);
-    
+    println!("{}", result);
+    println!("name: {}", credential.name);
+    println!("id: {}", credential.id);
 }
