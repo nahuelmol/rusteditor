@@ -1,7 +1,7 @@
-use crate::Command;
+use crate::CliCommand;
 use crate::file_meths::utils::{ flag_taker };
 
-pub fn convert(command:&Command){
+pub fn convert(command:&CliCommand){
     let mut input: bool = false;
     let mut output:bool = false;
  

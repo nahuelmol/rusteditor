@@ -1,7 +1,7 @@
 use std::io;
 use std::fs;
 
-use crate::Command;
+use crate::CliCommand;
 
 use crate::file_meths::utils::flag_taker;
 use std::fs::{ File, OpenOptions};
@@ -58,7 +58,7 @@ pub fn edit_file(filename:String) {
         .expect("error writing file");
 }
 
-pub fn set_appname(command:&Command){
+pub fn set_appname(command:&CliCommand){
     let newname = flag_taker(&command.flags,"nn".to_string());
     let mut temporary = String::new();
     let exists:bool = match fs::metadata("config.json") {

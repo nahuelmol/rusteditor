@@ -8,13 +8,13 @@ mod presentations;
 use file_meths::file_fns::switch_action;
 use help::helpers::help_msg;
 
-pub struct Command {
+pub struct CliCommand {
     action:String,
     flags:Vec<String>,
     valid:bool,
 }
 
-impl Command {
+impl CliCommand {
     fn new(args:Vec<String>) -> Self {
         let mut flags:Vec<String> = Vec::new();
         let mut action:String = String::new();
@@ -58,7 +58,7 @@ fn main() {
     for arg in env::args() {
         myargs.push(arg);
     };
-    let command = Command::new(myargs); 
+    let command = CliCommand::new(myargs); 
     if !command.valid {
         println!("the command is not valid");
         help_msg();

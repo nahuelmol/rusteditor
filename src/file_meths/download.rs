@@ -1,7 +1,9 @@
-use crate::Command;
+use crate::CliCommand;
 use reqwest::Client;
 use futures::executor::block_on;
 use crate::file_meths::utils::{ flag_taker };
+
+use std::process::Command;
 
 pub struct Credential {
     name:String,
@@ -17,7 +19,7 @@ impl Credential {
     }
 }
 
-pub fn download(command:&Command){
+pub fn download(command:&CliCommand){
     let mut url  = String::new();
     let mut creds= String::new();
     let mut body = String::new();
@@ -99,39 +101,48 @@ fn check_ftp(url:String) -> bool {
     }
     return false;
 }
-fn tar_format(file) -> String {
-    let index = file.rfind('.');
+fn tar_format(file:String) -> String {
+    let index = if let Some(i) = file.rfind('.') {i} else {0};
     let extension = &file[index..];
-    let mut flag:String;
+    let mut flag = String::new();
 
     if extension == ".xz" || extension == ".txz" {
         //x stands for extract
         flag = "-xJvf".to_string();
     }
-    if else extension == ".gz" || extension == ".tgz" {
+    if extension == ".gz" || extension == ".tgz"  {
         flag = "-xzvf".to_string();
     }
-    if else extension == ".bz2" || extension ==".tbz2"{
+    if extension == ".bz2" || extension ==".tbz2" {
         flag = "-xjvf".to_string();
     } 
-    if else extension == ".Z" {
+    if extension == ".Z"  {
         flag = "-xZvf".to_string();
     }
-    if else extension == ".lz" || extension == ".tlz" {
+    if extension == ".lz" || extension == ".tlz"  {
         flag = "--lzma -xvf".to_string();
     } 
-    if else extension == ".lz4" || extension == ".tlz4"{
+    if extension == ".lz4" || extension == ".tlz4" {
         flag = "--lz4 -xvf".to_string();
     }
-    if else extension == ".sz" || extension == ".tsz" {
+    if  extension == ".sz" || extension == ".tsz" {
         flag = "--zstd -xvf".to_string();
     }
     return flag;
 }
 
-fn install_extracted_pkg(){
+fn install_extracted_pkg(pkg_name:String){
+    let cmd:String = "cd ".to_string() + pkg_name.as_str();
+    let entering  = Command::new(cmd)
+        .args(&[""])//I think there's not arguments for install
+        .output()
+        .expect("error entering pkg");
+
+    if entering.status.success() { println!("perfect"); } 
+    else { println!("err"); };
+
     let ins = Command::new("./configure")
-        .args()//I think there's not arguments for install
+        .args(&[""])//I think there's not arguments for install
         .output()
         .expect("error executing ./configure");
     
@@ -144,7 +155,7 @@ fn install_extracted_pkg(){
     }
 
     let ins = Command::new("./install.sh")
-        .args()//I think there's not arguments for install
+        .args(&[""])//I think there's not arguments for install
         .output()
         .expect("error executing install.sh");
 
@@ -157,14 +168,12 @@ fn install_extracted_pkg(){
     }
 }
 
-fn standard_installation(url){
-    let index = url.rfind('/');
-    let file  = &url[index..];
-
-    let flag = tar_format(file);
-
+fn standard_installation(url:String){
+    let index = if let Some(i) = url.rfind('/') {i} else {0};
+    let file:&str = &url[index..];
+    let flag = tar_format(file.to_string());
     let output = Command::new("tar")
-        .args(&[flag, file])
+        .args(&[flag, file.to_string()])
         .output()
         .expect("Failed in tar execution");
     
@@ -175,9 +184,7 @@ fn standard_installation(url){
         eprintln!("error extracting:{} ", err);
         return;
     }
-
-    
-
+    install_extracted_pkg(file.to_string());
 }
 
 pub fn download_and_install(url:String, credentials:String, _body:String){
@@ -190,7 +197,7 @@ pub fn download_and_install(url:String, credentials:String, _body:String){
         println!("pls, enter a valid file format");
         return;
     }
-    let result = block_on(dareq(url));
+    let result = block_on(dareq(url.clone()));
     let data:Vec<&str> = credentials.split(',').collect();
     let myid:u32 = match data[1].replace(" ", "").parse() {
         Ok(num) => num,
@@ -203,6 +210,7 @@ pub fn download_and_install(url:String, credentials:String, _body:String){
     println!("{}", result);
     println!("name: {}", credential.name);
     println!("id: {}", credential.id);
+    standard_installation(url.clone());
     //I must compare user's credentials with the credentail the APi is waiting for
     //what is means install? I can use cmd tools like curls 
 }

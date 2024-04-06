@@ -17,7 +17,7 @@ use crate::file_meths::dependency_mg::{ inject_deps, dependency };
 use crate::file_meths::{ edits, deletea, converter, download };
 use crate::file_meths::checker::{ check_type_target, check_app_name};
 
-use crate::Command;
+use crate::CliCommand;
 
 
 pub fn create_file(filename:String, flags:&Vec<String>) {
@@ -145,7 +145,7 @@ fn single_carpet(carpet:String){
     };
 }
 
-fn project_init(command:&Command){
+fn project_init(command:&CliCommand){
     let mut typeon: bool = false;
     let mut projectname:String = String::new();
     for flg in command.flags.iter() {
@@ -182,7 +182,7 @@ fn project_init(command:&Command){
     project_files();
 }
 
-pub fn switch_action(command:&Command){
+pub fn switch_action(command:&CliCommand){
 
     if command.action == "new" {
         for flg in command.flags.iter() {
